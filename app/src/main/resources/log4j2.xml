@@ -1,0 +1,64 @@
+<Configuration status="info" monitorInterval="1">
+    
+    <CustomLevels>
+        <CustomLevel name="DB" intLevel="410" />
+    </CustomLevels>
+    
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/> -->
+            <PatternLayout pattern="%d{yyyy-MM-dd} %d{HH:mm:ss.SSS} %highlight{[%-5level]}{FATAL=red, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=green bold, TRACE=blue} %msg - %logger{36}.%M (%F:%L)%n"/>
+        </Console>
+
+        <JDBC name="DBLogsStore" tableName="logs">
+            <ConnectionFactory 
+                class="log4jexample.ConnectionFactory" 
+                method="getDatabaseConnection" />
+            <Column name="log_at" isEventTimestamp="true" />
+            <Column name="loglevel" pattern="%level" />
+            <Column name="logger" pattern="%logger" />
+            <Column name="message" pattern="%message" />
+            <Column name="exception" pattern="%ex{full}" isClob="true"/>
+            
+            <Filters>
+                <!-- First deny warn, error and fatal messages -->
+                <!--<ThresholdFilter level="debug"  onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--<ThresholdFilter level="trace"  onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--<ThresholdFilter level="warn"  onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--<ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+                <!--<ThresholdFilter level="fatal" onMatch="DENY" onMismatch="NEUTRAL"/>-->
+
+                <!--Then accept info, warn, error, fatal and deny debug/trace--> 
+                <ThresholdFilter level="info"  onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="db"  onMatch="ACCEPT" onMismatch="ACCEPT"/>
+            </Filters>
+        </JDBC>
+
+    </Appenders>
+
+
+    <Loggers>
+
+        <!-- **************************************************** -->
+        <!-- LOG LEVELS off fatal error warn info debug trace all -->
+        <!-- **************************************************** -->
+
+
+
+        <!--
+        <Logger name="bel.log4j.bug.App" level="trace" additivity="false">
+            <MarkerFilter marker="MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="CreamRollingFile"/>
+        </Logger>
+        -->
+
+        <Root level="trace">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="DBLogsStore" level="db"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
